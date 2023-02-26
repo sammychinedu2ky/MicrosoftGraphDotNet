@@ -36,7 +36,6 @@ config.AzureTenantId!,
 config.AzureClientId!,
 config.AzureClientSecret!);
 
-var scopes = new[] { "User.Read", "Files.ReadWrite.All" };
 var graphClient = new GraphServiceClient(tokenCred);
 
 // Define the file name and create a new Excel file in OneDrive
