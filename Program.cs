@@ -28,7 +28,7 @@ new RepositoryAffiliation?[] { RepositoryAffiliation.Owner })
 // Execute the GraphQL query and deserialize the result into a list of repositories
 var result = await connection.Run(query);
 var languages = result.SelectMany(repo => repo.Languages).Distinct().ToList();
-var output = JsonSerializer.Deserialize<Repository[]>(JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
+var repoNameAndLanguages = JsonSerializer.Deserialize<Repository[]>(JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
 
 // Define credentials and access scopes for Microsoft Graph API
 var tokenCred = new ClientSecretCredential(
@@ -52,7 +52,7 @@ var newFile = await graphClient.Drive.Root.Children
 .AddAsync(driveItem);
 
 // Define the address of the Excel table and create a new table in the file
-var address = "Sheet1!A1:" + (char)('A' + languages.Count) + output?.Count();
+var address = "Sheet1!A1:" + (char)('A' + languages.Count) + repoNameAndLanguages?.Count();
 var hasHeaders = true;
 var table = await graphClient.Drive.Items[newFile.Id].Workbook.Tables
 .Add(hasHeaders, address)
@@ -64,7 +64,7 @@ var firstRow = new List<string> { "Repository Name" }.Concat(languages).ToList()
 
 // Convert the repository data into a two-dimensional list
 List<List<string>> totalRows = new List<List<string>> { firstRow };
-foreach (var value in output!)
+foreach (var value in repoNameAndLanguages!)
 {
     var row = new List<string> { value.Name! };
     foreach (var language in languages)
@@ -112,7 +112,7 @@ Tables[table.Id].Rows
 
 // Add a new chart to the worksheet with the language totals as data
 await graphClient.Drive.Items[newFile.Id].Workbook.Worksheets["Sheet1"].Charts
-.Add("ColumnClustered", "Auto", JsonSerializer.SerializeToDocument($"Sheet1!B2:{(char)('A' + languages.Count)}2, Sheet1!B{output.Count() + 3}:{(char)('A' + languages.Count)}{output.Count() + 3}"))
+.Add("ColumnClustered", "Auto", JsonSerializer.SerializeToDocument($"Sheet1!B2:{(char)('A' + languages.Count)}2, Sheet1!B{repoNameAndLanguages.Count() + 3}:{(char)('A' + languages.Count)}{repoNameAndLanguages.Count() + 3}"))
 .Request()
 .PostAsync();
 
