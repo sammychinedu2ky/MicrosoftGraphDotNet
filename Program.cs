@@ -28,7 +28,7 @@ new RepositoryAffiliation?[] { RepositoryAffiliation.Owner })
 // Execute the GraphQL query and deserialize the result into a list of repositories
 var result = await connection.Run(query);
 var languages = result.SelectMany(repo => repo.Languages).Distinct().ToList();
-var repoNameAndLanguages = JsonSerializer.Deserialize<Repository[]>(JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
+var repoNameAndLanguages = JsonSerializer.Deserialize<Repository[]>(JsonSerializer.Serialize(result));
 
 // Define credentials and access scopes for Microsoft Graph API
 var tokenCred = new ClientSecretCredential(
